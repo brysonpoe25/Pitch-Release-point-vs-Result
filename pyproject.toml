@@ -1,0 +1,20 @@
+[project]
+name = "streamlit-eda-project"
+version = "0.1.0"
+description = "Streamlit EDA app exploring pitch release point vs. outcome in a college baseball TrackMan dataset."
+authors = [
+    { name = "Bpoe15", email = "brysonpoe25@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "plotly>=6.9.0",
+    "seaborn>=0.13.2",
+    "statsmodels>=0.14.6",
+    "streamlit>=1.62.0",
+]
+
+[tool.uv]
+package = false
