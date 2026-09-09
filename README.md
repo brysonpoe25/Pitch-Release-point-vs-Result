@@ -5,6 +5,12 @@ college baseball pitch-tracking dataset, with a focus on one question:
 
 > **Does *where* a pitcher releases the ball relate to *what happens* to the pitch?**
 
+This repo also contains **[`web/`](web)** — a full deployable website
+answering the same question, built on **Next.js, shadcn/ui, Recharts, and
+Supabase**, ready to host on **Vercel**. See [`web/README.md`](web/README.md)
+for local dev / Supabase / Vercel setup, and [`supabase/`](supabase) for the
+Postgres schema and seed data.
+
 The app lets you filter by pitcher, pitch type, and outcome, and visualizes
 release point (height, side, extension) against pitch results — balls,
 called strikes, whiffs, fouls, and balls in play.
@@ -86,6 +92,13 @@ streamlit-eda-project/
 ├── data/
 │   └── pitch_data.csv    # dataset
 ├── screenshots/          # README screenshots
+├── scripts/
+│   └── build_data.py     # data/pitch_data.csv -> supabase/seed.sql + web/src/data/pitches.json
+├── supabase/
+│   ├── schema.sql         # Postgres tables, views, RLS policies
+│   ├── seed.sql            # generated insert statements
+│   └── README.md
+├── web/                   # Next.js + shadcn/ui + Supabase website (see web/README.md)
 ├── pyproject.toml        # dependencies (managed with uv)
 ├── uv.lock
 └── README.md
