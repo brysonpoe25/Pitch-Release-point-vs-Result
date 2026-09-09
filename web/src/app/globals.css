@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --radius: 0.5rem;
+
+  /* FinchField navy + baseball-gold theme */
+  --background: #f7f8fa;
+  --foreground: #10192e;
+
+  --card: #ffffff;
+  --card-foreground: #10192e;
+
+  --popover: #ffffff;
+  --popover-foreground: #10192e;
+
+  --primary: #14213d;
+  --primary-foreground: #f8fafc;
+
+  --secondary: #eef1f6;
+  --secondary-foreground: #14213d;
+
+  --muted: #eef1f6;
+  --muted-foreground: #5b6478;
+
+  --accent: #f5a623;
+  --accent-foreground: #14213d;
+
+  --destructive: #c8102e;
+  --destructive-foreground: #f8fafc;
+
+  --border: #e2e5eb;
+  --input: #e2e5eb;
+  --ring: #14213d;
+
+  --chart-1: #219ebc;
+  --chart-2: #f5a623;
+  --chart-3: #2a9d8f;
+  --chart-4: #c8102e;
+  --chart-5: #6c757d;
+
+  /* pitch-outcome categorical palette, shared by charts + badges */
+  --outcome-ball: #8ecae6;
+  --outcome-called-strike: #219ebc;
+  --outcome-swinging-strike: #023047;
+  --outcome-foul: #f5a623;
+  --outcome-hbp: #c8102e;
+  --outcome-in-play-out: #6c757d;
+  --outcome-in-play-hit: #2a9d8f;
+  --outcome-in-play-other: #adb5bd;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
