@@ -98,7 +98,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 5.9,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 5.9,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95,\n  \"spin_rate\": 2320\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/score",
@@ -122,7 +122,7 @@
               "    pm.expect(body.pitcher).to.eql('Purvis, Drake');",
               "    pm.expect(body.known_pitcher).to.be.a('boolean');",
               "    pm.expect(body.deviation_from_baseline).to.have.all.keys(",
-              "        'rel_height_ft', 'rel_side_ft', 'extension_ft'",
+              "        'rel_height_ft', 'rel_side_ft', 'extension_ft', 'spin_rate_rpm'",
               "    );",
               "    pm.expect(body.euclidean_deviation_ft).to.be.a('number');",
               "    pm.expect(body.anomaly_score).to.be.a('number');",
@@ -146,7 +146,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 50.0,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 50.0,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95,\n  \"spin_rate\": 2320\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/score",
@@ -183,7 +183,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_side\": -0.55,\n  \"extension\": 5.95,\n  \"spin_rate\": 2320\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/score",

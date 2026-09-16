@@ -2,9 +2,10 @@
 Custom transformer for the release-point anomaly pipeline.
 
 ReleasePointDeviationTransformer learns each pitcher's own release-point
-"fingerprint" (mean release height/side/extension) at fit time, then turns
-any new pitch into how far it deviates from *that pitcher's* fingerprint
-(or the league-wide fingerprint, for a pitcher never seen during fit).
+"fingerprint" (mean release height/side/extension/spin rate) at fit time,
+then turns any new pitch into how far it deviates from *that pitcher's*
+fingerprint (or the league-wide fingerprint, for a pitcher never seen
+during fit).
 
 This is the piece of learned state that makes the pipeline meaningless if
 rebuilt from scratch at request time: the per-pitcher centroids come from
@@ -17,22 +18,32 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
-FEATURE_COLS = ["RelHeight", "RelSide", "Extension"]
+RELEASE_POINT_COLS = ["RelHeight", "RelSide", "Extension"]
+FEATURE_COLS = [*RELEASE_POINT_COLS, "SpinRate"]
 
 
 class ReleasePointDeviationTransformer(BaseEstimator, TransformerMixin):
-    """Map (pitcher, RelHeight, RelSide, Extension) -> deviation-from-own-baseline features.
+    """Map (pitcher, RelHeight, RelSide, Extension, SpinRate) -> deviation-from-own-baseline features.
 
     Output columns, in order:
-        dev_rel_height, dev_rel_side, dev_extension, euclidean_dev
+        dev_rel_height, dev_rel_side, dev_extension, dev_spin_rate, euclidean_dev
     where dev_* = raw value - that pitcher's fitted mean for that feature
-    (falling back to the global mean for an unseen pitcher), and
-    euclidean_dev is the L2 norm of the three deviations.
+    (falling back to the global mean for an unseen pitcher). euclidean_dev is
+    the L2 norm of only the release-point deviations (feet) -- spin rate
+    (rpm) is deliberately excluded from that norm since mixing units into
+    one distance would be physically meaningless. Its own deviation still
+    feeds the scaler/anomaly step downstream, just not that distance.
     """
 
-    def __init__(self, pitcher_col: str = "Pitcher", feature_cols: tuple[str, ...] = tuple(FEATURE_COLS)):
+    def __init__(
+        self,
+        pitcher_col: str = "Pitcher",
+        feature_cols: tuple[str, ...] = tuple(FEATURE_COLS),
+        distance_cols: tuple[str, ...] = tuple(RELEASE_POINT_COLS),
+    ):
         self.pitcher_col = pitcher_col
         self.feature_cols = feature_cols
+        self.distance_cols = distance_cols
 
     def fit(self, X: pd.DataFrame, y=None) -> "ReleasePointDeviationTransformer":
         X = pd.DataFrame(X)
@@ -62,10 +73,16 @@ class ReleasePointDeviationTransformer(BaseEstimator, TransformerMixin):
         )
 
         deviation = raw - centroids
-        euclidean_dev = np.linalg.norm(deviation, axis=1, keepdims=True)
+        distance_idx = [cols.index(c) for c in self.distance_cols]
+        euclidean_dev = np.linalg.norm(deviation[:, distance_idx], axis=1, keepdims=True)
         return np.hstack([deviation, euclidean_dev])
 
     def get_feature_names_out(self, input_features=None) -> np.ndarray:
-        name_map = {"RelHeight": "dev_rel_height", "RelSide": "dev_rel_side", "Extension": "dev_extension"}
+        name_map = {
+            "RelHeight": "dev_rel_height",
+            "RelSide": "dev_rel_side",
+            "Extension": "dev_extension",
+            "SpinRate": "dev_spin_rate",
+        }
         base = [name_map.get(c, f"dev_{c}") for c in self.feature_cols]
         return np.array(base + ["euclidean_dev"])
