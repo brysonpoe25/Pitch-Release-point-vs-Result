@@ -16,13 +16,17 @@ ReleasePointDeviationTransformer (custom, pipeline_def.py)
 
 `ReleasePointDeviationTransformer` is fit on `data/pitch_data.csv` (315
 pitches, 8 pitchers from a real TrackMan college-game export). At `fit()`
-time it learns each pitcher's mean release height/side/extension —
-learned state that is meaningless if the pipeline is rebuilt from scratch
-per request. At `transform()` time it turns a new pitch into how far it
-deviates from *that pitcher's* centroid (falling back to the league-wide
-centroid for an unseen pitcher). `StandardScaler` normalizes those
-deviations, and `IsolationForest` scores how anomalous the deviation
-pattern is relative to the fitted population.
+time it learns each pitcher's mean release height/side/extension/spin
+rate — learned state that is meaningless if the pipeline is rebuilt from
+scratch per request. At `transform()` time it turns a new pitch into how
+far it deviates from *that pitcher's* centroid on each of those four
+features (falling back to the league-wide centroid for an unseen
+pitcher). The Euclidean deviation reported by the API is computed from
+the release-point features (feet) only — spin rate (rpm) is a separate
+deviation column so it never gets mixed into a physically meaningless
+combined-unit distance, though it still feeds the scaler/anomaly step.
+`StandardScaler` normalizes all deviations, and `IsolationForest` scores
+how anomalous the deviation pattern is relative to the fitted population.
 
 - Custom transformer: `ReleasePointDeviationTransformer` (`pipeline_def.py`)
 - sklearn version pinned at fit time: **1.9.1** (see `pipeline.joblib`'s

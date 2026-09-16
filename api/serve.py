@@ -32,8 +32,8 @@ ARTIFACT_PATH = Path(__file__).resolve().parent / "pipeline.joblib"
 app = FastAPI(
     title="Release-Point Anomaly API",
     description=(
-        "Scores a single pitch's release point (height/side/extension) for "
-        "how anomalous it is relative to that pitcher's own release-point "
+        "Scores a single pitch's release point (height/side/extension) and "
+        "spin rate for how anomalous it is relative to that pitcher's own "
         "fingerprint, learned from a college baseball TrackMan game."
     ),
     version="1.0.0",
@@ -85,6 +85,10 @@ class ScoreRequest(BaseModel):
         ..., ge=2.0, le=9.0,
         description="Release extension toward the plate, in feet.",
     )
+    spin_rate: float = Field(
+        ..., ge=500.0, le=4000.0,
+        description="Spin rate in rpm (typical pitched-ball range).",
+    )
 
 
 class ScoreResponse(BaseModel):
@@ -131,13 +135,14 @@ def score(request: ScoreRequest) -> ScoreResponse:
                 "RelHeight": request.rel_height,
                 "RelSide": request.rel_side,
                 "Extension": request.extension,
+                "SpinRate": request.spin_rate,
             }
         ]
     )
 
     deviation_step = pipeline.named_steps["release_deviation"]
     deviation = deviation_step.transform(row)[0]
-    dev_height, dev_side, dev_extension, euclidean_dev = deviation
+    dev_height, dev_side, dev_extension, dev_spin_rate, euclidean_dev = deviation
 
     # -1 = anomaly, 1 = inlier (IsolationForest convention)
     prediction = pipeline.predict(row)[0]
@@ -150,6 +155,7 @@ def score(request: ScoreRequest) -> ScoreResponse:
             "rel_height_ft": round(float(dev_height), 4),
             "rel_side_ft": round(float(dev_side), 4),
             "extension_ft": round(float(dev_extension), 4),
+            "spin_rate_rpm": round(float(dev_spin_rate), 2),
         },
         euclidean_deviation_ft=round(float(euclidean_dev), 4),
         anomaly_score=round(anomaly_score, 6),

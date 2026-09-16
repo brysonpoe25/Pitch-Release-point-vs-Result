@@ -23,6 +23,7 @@ export type ScoreRequest = {
   rel_height: number;
   rel_side: number;
   extension: number;
+  spin_rate: number;
 };
 
 export type ScoreResponse = {
@@ -32,6 +33,7 @@ export type ScoreResponse = {
     rel_height_ft: number;
     rel_side_ft: number;
     extension_ft: number;
+    spin_rate_rpm: number;
   };
   euclidean_deviation_ft: number;
   anomaly_score: number;

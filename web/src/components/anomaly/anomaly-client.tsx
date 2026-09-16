@@ -28,6 +28,7 @@ const DEFAULT_FORM = {
   rel_height: "5.9",
   rel_side: "-0.55",
   extension: "5.95",
+  spin_rate: "2320",
 };
 
 export function AnomalyClient() {
@@ -58,6 +59,7 @@ export function AnomalyClient() {
         rel_height: Number(form.rel_height),
         rel_side: Number(form.rel_side),
         extension: Number(form.extension),
+        spin_rate: Number(form.spin_rate),
       });
       setResult(response);
     } catch (err) {
@@ -111,7 +113,7 @@ export function AnomalyClient() {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="rel_height">Release height (ft)</Label>
                 <Input
@@ -148,6 +150,19 @@ export function AnomalyClient() {
                   max={9}
                   value={form.extension}
                   onChange={(e) => setForm((f) => ({ ...f, extension: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="spin_rate">Spin rate (rpm)</Label>
+                <Input
+                  id="spin_rate"
+                  type="number"
+                  step="1"
+                  min={500}
+                  max={4000}
+                  value={form.spin_rate}
+                  onChange={(e) => setForm((f) => ({ ...f, spin_rate: e.target.value }))}
                   required
                 />
               </div>
@@ -213,6 +228,10 @@ export function AnomalyClient() {
                   <dt className="text-muted-foreground">Δ extension</dt>
                   <dd className="text-right tabular-nums">
                     {result.deviation_from_baseline.extension_ft.toFixed(3)} ft
+                  </dd>
+                  <dt className="text-muted-foreground">Δ spin rate</dt>
+                  <dd className="text-right tabular-nums">
+                    {result.deviation_from_baseline.spin_rate_rpm.toFixed(1)} rpm
                   </dd>
                 </dl>
               </div>
