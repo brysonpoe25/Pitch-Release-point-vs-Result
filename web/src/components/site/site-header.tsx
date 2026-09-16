@@ -5,6 +5,7 @@ import { GithubIcon } from "@/components/site/github-icon";
 
 const NAV_LINKS = [
   { href: "/explorer", label: "Explorer" },
+  { href: "/anomaly", label: "Anomaly Scorer" },
   { href: "/about", label: "About" },
 ];
 
