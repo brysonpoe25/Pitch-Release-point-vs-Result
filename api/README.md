@@ -71,16 +71,34 @@ modal token new          # one-time browser login, if you haven't already
 modal deploy modal_serve.py
 ```
 
-`modal deploy` prints a public URL like
-`https://<workspace>--release-point-anomaly-api.modal.run`. Use that URL
-(not localhost) for:
+`modal deploy` prints a public URL. **Deployed URL for this project:**
 
-- the frontend (`web/` — see `NEXT_PUBLIC_PIPELINE_API_URL` in
-  `web/.env.example`)
-- the Postman collection's `baseUrl` variable
-- the Canvas submission (Modal API URL + `<url>/docs`)
+```
+https://brysonpoe25--release-point-anomaly-api-fastapi-app.modal.run
+```
+
+Interactive docs: <https://brysonpoe25--release-point-anomaly-api-fastapi-app.modal.run/docs>
+
+That URL (not localhost) is wired into:
+
+- the frontend (`web/` — the `/anomaly` page, via `NEXT_PUBLIC_PIPELINE_API_URL`
+  in `web/.env.example` / `web/.env.local`)
+- `postman_collection.json`'s `baseUrl` collection variable
 
 The Modal image ships exactly three files (`serve.py`, `pipeline_def.py`,
 `pipeline.joblib`) and pins `scikit-learn==1.9.1` to match the version the
 artifact was fitted with, so it never rebuilds the pipeline at boot and
 never hits a version mismatch on unpickling.
+
+## Postman
+
+`postman_collection.json` covers health (`GET /`), pipeline info
+(`GET /info`), a valid `POST /score` (expect 200), and two invalid
+`POST /score` calls — out-of-bounds and missing field (expect 422) — all
+asserted against the `baseUrl` variable, defaulted to the deployed Modal
+URL above. Verified with `newman` against a local instance (14/15
+assertions pass; the 15th is an intentional guard that fails on purpose if
+`baseUrl` is ever pointed at localhost).
+
+Import into Postman, run each request, and screenshot the valid (200) and
+an invalid (422) response for the Canvas submission.

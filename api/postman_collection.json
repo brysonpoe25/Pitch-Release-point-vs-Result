@@ -1,0 +1,216 @@
+{
+  "info": {
+    "name": "Release-Point Anomaly API",
+    "description": "Assignment 4 — assertions against the deployed Modal API for the release-point anomaly Pipeline. Set the `baseUrl` collection variable to the live Modal URL before running (never localhost).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://brysonpoe25--release-point-anomaly-api-fastapi-app.modal.run",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check (GET /)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response reports ok status', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.status).to.eql('ok');",
+              "    pm.expect(body.service).to.eql('release-point-anomaly-api');",
+              "});",
+              "",
+              "pm.test('baseUrl is not localhost', function () {",
+              "    pm.expect(pm.variables.get('baseUrl')).to.not.include('localhost');",
+              "    pm.expect(pm.variables.get('baseUrl')).to.not.include('127.0.0.1');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pipeline info (GET /info)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/info",
+          "host": ["{{baseUrl}}"],
+          "path": ["info"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('Describes the fitted pipeline steps', function () {",
+              "    pm.expect(body.steps).to.eql(['release_deviation', 'scaler', 'iforest']);",
+              "});",
+              "",
+              "pm.test('Reports the sklearn version pinned at fit time', function () {",
+              "    pm.expect(body.sklearn_version_at_fit).to.be.a('string').and.not.empty;",
+              "    pm.expect(body.sklearn_version_running).to.eql(body.sklearn_version_at_fit);",
+              "});",
+              "",
+              "pm.test('Reports learned state (known pitchers), not a fresh/empty model', function () {",
+              "    pm.expect(body.known_pitchers).to.be.an('array').with.length.greaterThan(0);",
+              "    pm.expect(body.n_training_pitches).to.be.greaterThan(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Score a pitch - valid (POST /score -> 200)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 5.9,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/score",
+          "host": ["{{baseUrl}}"],
+          "path": ["score"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const body = pm.response.json();",
+              "",
+              "pm.test('Response has the expected score shape', function () {",
+              "    pm.expect(body.pitcher).to.eql('Purvis, Drake');",
+              "    pm.expect(body.known_pitcher).to.be.a('boolean');",
+              "    pm.expect(body.deviation_from_baseline).to.have.all.keys(",
+              "        'rel_height_ft', 'rel_side_ft', 'extension_ft'",
+              "    );",
+              "    pm.expect(body.euclidean_deviation_ft).to.be.a('number');",
+              "    pm.expect(body.anomaly_score).to.be.a('number');",
+              "    pm.expect(body.is_anomaly).to.be.a('boolean');",
+              "});",
+              "",
+              "pm.test('Known pitcher from the training data is recognized', function () {",
+              "    pm.expect(body.known_pitcher).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Score a pitch - invalid (POST /score -> 422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_height\": 50.0,\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/score",
+          "host": ["{{baseUrl}}"],
+          "path": ["score"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 422 for out-of-bounds input', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "",
+              "pm.test('Error identifies the offending field', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.detail).to.be.an('array').with.length.greaterThan(0);",
+              "    pm.expect(body.detail[0].loc).to.include('rel_height');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Score a pitch - missing field (POST /score -> 422)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pitcher\": \"Purvis, Drake\",\n  \"rel_side\": -0.55,\n  \"extension\": 5.95\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/score",
+          "host": ["{{baseUrl}}"],
+          "path": ["score"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 422 for a missing required field', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "",
+              "pm.test('Error reports rel_height as missing', function () {",
+              "    const body = pm.response.json();",
+              "    const relHeightError = body.detail.find((d) => d.loc.includes('rel_height'));",
+              "    pm.expect(relHeightError).to.exist;",
+              "    pm.expect(relHeightError.type).to.eql('missing');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
